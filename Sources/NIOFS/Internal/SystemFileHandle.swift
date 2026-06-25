@@ -21,9 +21,11 @@ import SystemPackage
 import Darwin
 #elseif canImport(Glibc)
 @preconcurrency import Glibc
+import CNIOFreeBSD
 import CNIOLinux
 #elseif canImport(Musl)
 @preconcurrency import Musl
+import CNIOFreeBSD
 import CNIOLinux
 #elseif canImport(Bionic)
 @preconcurrency import Bionic

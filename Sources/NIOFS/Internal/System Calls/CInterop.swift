@@ -17,6 +17,9 @@ import SystemPackage
 #if canImport(Darwin)
 import Darwin
 import CNIODarwin
+#elseif os(FreeBSD)
+@preconcurrency import Glibc
+import CNIOFreeBSD
 #elseif canImport(Glibc)
 @preconcurrency import Glibc
 import CNIOLinux
@@ -32,6 +35,8 @@ import CNIOLinux
 extension CInterop {
     #if canImport(Darwin)
     public typealias Stat = Darwin.stat
+    #elseif os(FreeBSD)
+    public typealias Stat = Glibc.stat
     #elseif canImport(Glibc)
     public typealias Stat = Glibc.stat
     #elseif canImport(Musl)
@@ -43,6 +48,9 @@ extension CInterop {
     #if canImport(Darwin)
     @_spi(Testing)
     public static let maxPathLength = Darwin.PATH_MAX
+    #elseif os(FreeBSD)
+    @_spi(Testing)
+    public static let maxPathLength = Glibc.PATH_MAX
     #elseif canImport(Glibc)
     @_spi(Testing)
     public static let maxPathLength = Glibc.PATH_MAX
@@ -56,13 +64,13 @@ extension CInterop {
 
     #if canImport(Darwin)
     typealias DirPointer = UnsafeMutablePointer<Darwin.DIR>
-    #elseif canImport(Glibc) || canImport(Musl) || canImport(Android)
+    #elseif os(FreeBSD) || canImport(Glibc) || canImport(Musl) || canImport(Android)
     typealias DirPointer = OpaquePointer
     #endif
 
     #if canImport(Darwin)
     typealias DirEnt = Darwin.dirent
-    #elseif canImport(Glibc)
+    #elseif os(FreeBSD) || canImport(Glibc)
     typealias DirEnt = Glibc.dirent
     #elseif canImport(Musl)
     typealias DirEnt = Musl.dirent
@@ -73,6 +81,9 @@ extension CInterop {
     #if canImport(Darwin)
     typealias FTS = CNIODarwin.FTS
     typealias FTSEnt = CNIODarwin.FTSENT
+    #elseif os(FreeBSD)
+    typealias FTS = CNIOFreeBSD.FTS
+    typealias FTSEnt = CNIOFreeBSD.FTSENT
     #elseif canImport(Glibc) || canImport(Musl) || canImport(Android)
     typealias FTS = CNIOLinux.FTS
     typealias FTSEnt = CNIOLinux.FTSENT

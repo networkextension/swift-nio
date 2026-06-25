@@ -14,7 +14,13 @@
 
 #if os(Linux) || os(Android) || os(FreeBSD) || canImport(Darwin) || os(OpenBSD)
 
-#if os(Linux) || os(Android) || os(FreeBSD) /* FreeBSD-thread-fix */
+#if os(FreeBSD)
+import CNIOFreeBSD
+
+private let sys_pthread_getname_np = CNIOFreeBSD_pthread_getname_np
+private let sys_pthread_setname_np = CNIOFreeBSD_pthread_setname_np
+private typealias ThreadDestructor = @convention(c) (UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
+#elseif os(Linux) || os(Android)
 import CNIOLinux
 
 private let sys_pthread_getname_np = CNIOLinux_pthread_getname_np
@@ -24,7 +30,7 @@ private typealias ThreadDestructor = @convention(c) (UnsafeMutableRawPointer) ->
 #else
 private typealias ThreadDestructor = @convention(c) (UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
 #endif
-#elseif os(OpenBSD) || os(FreeBSD)
+#elseif os(OpenBSD)
 import CNIOOpenBSD
 
 private let sys_pthread_getname_np = CNIOOpenBSD_pthread_get_name_np

@@ -21,7 +21,12 @@ import NIOCore
 @_exported import Darwin.C
 import CNIODarwin
 internal typealias MMsgHdr = CNIODarwin_mmsghdr
-#elseif os(Linux) || os(FreeBSD) || os(Android)
+#elseif os(FreeBSD)
+@_exported @preconcurrency import Glibc
+import CNIOFreeBSD
+internal typealias MMsgHdr = CNIOFreeBSD_mmsghdr
+// in6_pktinfo is already defined in FreeBSD system headers
+#elseif os(Linux) || os(Android)
 #if canImport(Glibc)
 @_exported @preconcurrency import Glibc
 #elseif canImport(Musl)
@@ -31,10 +36,7 @@ internal typealias MMsgHdr = CNIODarwin_mmsghdr
 #endif
 import CNIOLinux
 internal typealias MMsgHdr = CNIOLinux_mmsghdr
-/* FreeBSD-in6pktinfo-fix */
-#if !os(FreeBSD)
 internal typealias in6_pktinfo = CNIOLinux_in6_pktinfo
-#endif
 #elseif os(OpenBSD)
 @_exported @preconcurrency import Glibc
 import CNIOOpenBSD
@@ -178,8 +180,8 @@ private let sysSendMmsg = CNIOLinux_sendmmsg
 private let sysRecvMmsg = CNIOLinux_recvmmsg
 #elseif os(FreeBSD)
 private let sysKevent = kevent
-private let sysSendMmsg = CNIOLinux_sendmmsg
-private let sysRecvMmsg = CNIOLinux_recvmmsg
+private let sysSendMmsg = CNIOFreeBSD_sendmmsg
+private let sysRecvMmsg = CNIOFreeBSD_recvmmsg
 #elseif os(OpenBSD)
 private let sysKevent = kevent
 private let sysSendMmsg = CNIOOpenBSD_sendmmsg

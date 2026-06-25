@@ -16,6 +16,9 @@ import SystemPackage
 
 #if canImport(Darwin)
 import Darwin
+#elseif os(FreeBSD)
+@preconcurrency import Glibc
+import CNIOFreeBSD
 #elseif canImport(Glibc)
 @preconcurrency import Glibc
 import CNIOLinux
@@ -152,6 +155,9 @@ extension FileInfo {
         #if canImport(Darwin)
         private static let utimeOmit = Int(UTIME_OMIT)
         private static let utimeNow = Int(UTIME_NOW)
+        #elseif os(FreeBSD)
+        private static let utimeOmit = Int(CNIOFreeBSD_UTIME_OMIT)
+        private static let utimeNow = Int(CNIOFreeBSD_UTIME_NOW)
         #elseif canImport(Glibc) || canImport(Musl) || canImport(Android)
         private static let utimeOmit = Int(CNIOLinux_UTIME_OMIT)
         private static let utimeNow = Int(CNIOLinux_UTIME_NOW)

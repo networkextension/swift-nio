@@ -19,12 +19,15 @@ import Darwin
 import CNIODarwin
 #elseif canImport(Glibc)
 @preconcurrency import Glibc
+import CNIOFreeBSD
 import CNIOLinux
 #elseif canImport(Musl)
 @preconcurrency import Musl
+import CNIOFreeBSD
 import CNIOLinux
 #elseif canImport(Bionic)
 @preconcurrency import Bionic
+import CNIOFreeBSD
 import CNIOLinux
 #endif
 
