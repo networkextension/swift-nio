@@ -183,7 +183,7 @@ extension ChannelOptions.Types {
 extension NIOBSDSocket.AddressFamily {
     /// Address for vsock.
     public static var vsock: NIOBSDSocket.AddressFamily {
-        #if canImport(Darwin) || os(Linux) || os(Android)
+        #if canImport(Darwin) || os(Linux) || os(Android) || os(FreeBSD)
         NIOBSDSocket.AddressFamily(rawValue: AF_VSOCK)
         #else
         fatalError(vsockUnimplemented)
@@ -194,7 +194,7 @@ extension NIOBSDSocket.AddressFamily {
 extension NIOBSDSocket.ProtocolFamily {
     /// Address for vsock.
     public static var vsock: NIOBSDSocket.ProtocolFamily {
-        #if canImport(Darwin) || os(Linux) || os(Android)
+        #if canImport(Darwin) || os(Linux) || os(Android) || os(FreeBSD)
         NIOBSDSocket.ProtocolFamily(rawValue: PF_VSOCK)
         #else
         fatalError(vsockUnimplemented)
@@ -204,7 +204,7 @@ extension NIOBSDSocket.ProtocolFamily {
 
 extension VsockAddress {
     public func withSockAddr<T>(_ body: (UnsafePointer<sockaddr>, Int) throws -> T) rethrows -> T {
-        #if canImport(Darwin) || os(Linux) || os(Android)
+        #if canImport(Darwin) || os(Linux) || os(Android) || os(FreeBSD)
         return try self.address.withSockAddr({ try body($0, $1) })
         #else
         fatalError(vsockUnimplemented)
@@ -214,7 +214,7 @@ extension VsockAddress {
 
 // MARK: - Internal functions that are only available on supported platforms.
 
-#if canImport(Darwin) || os(Linux) || os(Android)
+#if canImport(Darwin) || os(Linux) || os(Android) || os(FreeBSD)
 extension VsockAddress.ContextID {
     /// Get the context ID of the local machine.
     ///
@@ -291,4 +291,4 @@ extension BaseSocket {
     }
 }
 
-#endif  // canImport(Darwin) || os(Linux) || os(Android)
+#endif  // canImport(Darwin) || os(Linux) || os(Android) || os(FreeBSD)
