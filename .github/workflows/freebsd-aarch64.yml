@@ -49,7 +49,7 @@ jobs:
           pkill -u swift -f "swift-package resolve" 2>/dev/null || true
           . "$HOME/swift64-env.sh"
           cd "$HOME/ci/swift-nio"
-          swift build 2>&1
+          swift build --build-system native 2>&1
           ENDSSH
 
   freebsd-144-aarch64:
@@ -95,5 +95,5 @@ jobs:
           pkill -u swift -f "swift-package resolve" 2>/dev/null || true
           . "$HOME/swift632-env.sh"
           cd "$HOME/ci/swift-nio"
-          swift build 2>&1
+          swift build --build-system native 2>&1
           ENDSSH
