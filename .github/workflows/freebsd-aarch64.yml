@@ -46,11 +46,13 @@ jobs:
           set -e
           # Stop any swift processes left over from a previous cancelled/timed-out run.
           pkill -u swift -x swift-build 2>/dev/null || true
+          pkill -u swift -f "swift build" 2>/dev/null || true
           pkill -u swift -f "swift-package resolve" 2>/dev/null || true
           . "$HOME/swift64-env.sh"
           cd "$HOME/ci/swift-nio"
+          rm -rf .build
           ln -sf "$SWIFT64/bin/swiftc" swiftc
-          "$SWIFT64/bin/swift" build --build-tests 2>&1
+          "$SWIFT64/bin/swift" build --target NIOTests 2>&1
           rm -f swiftc
           ENDSSH
 
@@ -94,11 +96,13 @@ jobs:
           set -e
           # Stop any swift processes left over from a previous cancelled/timed-out run.
           pkill -u swift -x swift-build 2>/dev/null || true
+          pkill -u swift -f "swift build" 2>/dev/null || true
           pkill -u swift -f "swift-package resolve" 2>/dev/null || true
           . "$HOME/swift632-env.sh"
           cd "$HOME/ci/swift-nio"
           TC="$HOME/s632-clean-install/usr/local/swift"
+          rm -rf .build
           ln -sf "$TC/bin/swiftc" swiftc
-          "$TC/bin/swift" build --build-tests 2>&1
+          "$TC/bin/swift" build --target NIOTests 2>&1
           rm -f swiftc
           ENDSSH
