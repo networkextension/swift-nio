@@ -84,6 +84,9 @@ static inline int CNIOLinux_accept4(int s,struct sockaddr *a,socklen_t *l,int f)
 #ifndef IPV6_PKTINFO
 #define IPV6_PKTINFO 46
 #endif
+#include <sys/stat.h>
+#define CNIOLinux_UTIME_OMIT UTIME_OMIT
+#define CNIOLinux_UTIME_NOW  UTIME_NOW
 #endif /* __FreeBSD__ */
 
 #ifdef __linux__
