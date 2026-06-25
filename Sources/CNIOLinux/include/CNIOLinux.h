@@ -25,6 +25,7 @@
 #include <sys/xattr.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fts.h>
 #include <sys/vfs.h>
 #include <sched.h>
 #include <stdbool.h>
@@ -85,6 +86,7 @@ static inline int CNIOLinux_accept4(int s,struct sockaddr *a,socklen_t *l,int f)
 #define IPV6_PKTINFO 46
 #endif
 #include <sys/stat.h>
+#include <fts.h>
 #define CNIOLinux_UTIME_OMIT UTIME_OMIT
 #define CNIOLinux_UTIME_NOW  UTIME_NOW
 #endif /* __FreeBSD__ */
