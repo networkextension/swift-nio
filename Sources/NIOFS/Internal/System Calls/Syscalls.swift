@@ -322,8 +322,6 @@ internal func system_renameat2(
     #if ENABLE_MOCKING
     if mockingEnabled {
         return mock(oldFD, old, newFD, new, flags)
-    #else
-    fatalError("xattr not supported on this platform")
     }
     #endif
     return CNIOLinux_renameat2(oldFD, old, newFD, new, flags)
@@ -342,8 +340,6 @@ internal func system_linkat(
     #if ENABLE_MOCKING
     if mockingEnabled {
         return mock(oldFD, old, newFD, new, flags)
-    #else
-    fatalError("xattr not supported on this platform")
     }
     #endif
     return linkat(oldFD, old, newFD, new, flags)
@@ -400,8 +396,6 @@ internal func system_sendfile(
     #if ENABLE_MOCKING
     if mockingEnabled {
         return mockInt(outFD, inFD, offset, count)
-    #else
-    fatalError("xattr not supported on this platform")
     }
     #endif
     var offset = offset

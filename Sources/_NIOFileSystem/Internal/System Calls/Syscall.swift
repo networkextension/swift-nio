@@ -131,7 +131,7 @@ public enum Syscall: Sendable {
     }
     #endif
 
-    #if canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+    #if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Bionic)
     @_spi(Testing)
     public static func rename(
         from old: FilePath,
@@ -173,7 +173,7 @@ public enum Syscall: Sendable {
     }
     #endif
 
-    #if canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+    #if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Bionic)
     @_spi(Testing)
     public struct LinkAtFlags: OptionSet {
         @_spi(Testing)
@@ -306,7 +306,7 @@ public enum Syscall: Sendable {
         }
     }
 
-    #if canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+    #if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Bionic)
     @_spi(Testing)
     public static func sendfile(
         to output: FileDescriptor,
