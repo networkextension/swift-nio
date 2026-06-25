@@ -165,7 +165,13 @@ private let sysSocketpair: @convention(c) (CInt, CInt, CInt, UnsafeMutablePointe
 
 #if os(Linux) || os(Android) || os(FreeBSD) || canImport(Darwin) || os(OpenBSD)
 private let sysFstat = fstat
+#if os(FreeBSD)
+// Swift 6.3 parses bare `stat` as the struct type (ambiguous with function) on FreeBSD.
+// Use a wrapper function so the call-site argument types disambiguate it as the syscall.
+private func sysStat(_ path: UnsafePointer<CChar>?, _ buf: UnsafeMutablePointer<stat>?) -> CInt { stat(path, buf) }
+#else
 private let sysStat = stat
+#endif
 private let sysLstat = lstat
 private let sysSymlink = symlink
 private let sysReadlink = readlink
@@ -503,11 +509,11 @@ internal enum Posix: Sendable {
     @usableFromInline
     static let UIO_MAXIOV: Int = 1024
     @usableFromInline
-    static let SHUT_RD: CInt = CInt(CNIOFreeBSD.SHUT_RD.rawValue)
+    static let SHUT_RD: CInt = CInt(CNIOFreeBSD.SHUT_RD)
     @usableFromInline
-    static let SHUT_WR: CInt = CInt(CNIOFreeBSD.SHUT_WR.rawValue)
+    static let SHUT_WR: CInt = CInt(CNIOFreeBSD.SHUT_WR)
     @usableFromInline
-    static let SHUT_RDWR: CInt = CInt(CNIOFreeBSD.SHUT_RDWR.rawValue)
+    static let SHUT_RDWR: CInt = CInt(CNIOFreeBSD.SHUT_RDWR)
     #endif
 
     #if canImport(Darwin)

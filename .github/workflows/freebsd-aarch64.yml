@@ -50,7 +50,7 @@ jobs:
           . "$HOME/swift64-env.sh"
           cd "$HOME/ci/swift-nio"
           ln -sf "$SWIFT64/bin/swiftc" swiftc
-          "$SWIFT64/bin/swift-build" 2>&1
+          "$SWIFT64/bin/swift-build" --build-tests 2>&1
           rm -f swiftc
           ENDSSH
 
@@ -99,6 +99,6 @@ jobs:
           cd "$HOME/ci/swift-nio"
           TC="$HOME/s632-clean-install/usr/local/swift"
           ln -sf "$TC/bin/swiftc" swiftc
-          "$TC/bin/swift-build" 2>&1
+          "$TC/bin/swift-build" --build-tests 2>&1
           rm -f swiftc
           ENDSSH
