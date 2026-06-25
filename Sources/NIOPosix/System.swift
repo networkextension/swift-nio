@@ -33,7 +33,10 @@ internal typealias MMsgHdr = CNIODarwin_mmsghdr
 #endif
 import CNIOLinux
 internal typealias MMsgHdr = CNIOLinux_mmsghdr
+/* FreeBSD-in6pktinfo-fix */
+#if !os(FreeBSD)
 internal typealias in6_pktinfo = CNIOLinux_in6_pktinfo
+#endif
 #elseif os(OpenBSD)
 @_exported @preconcurrency import Glibc
 import CNIOOpenBSD
@@ -158,7 +161,7 @@ private let sysSocketpair: @convention(c) (CInt, CInt, CInt, UnsafeMutablePointe
 private let sysSocketpair: @convention(c) (CInt, CInt, CInt, UnsafeMutablePointer<CInt>?) -> CInt = socketpair
 #endif
 
-#if os(Linux) || os(Android) || canImport(Darwin) || os(OpenBSD)
+#if os(Linux) || os(Android) || os(FreeBSD) || canImport(Darwin) || os(OpenBSD)
 private let sysFstat = fstat
 private let sysStat = stat
 private let sysLstat = lstat
@@ -173,6 +176,10 @@ private let sysRename = rename
 private let sysRemove = remove
 #endif
 #if os(Linux) || os(Android)
+private let sysSendMmsg = CNIOLinux_sendmmsg
+private let sysRecvMmsg = CNIOLinux_recvmmsg
+#elseif os(FreeBSD)
+private let sysKevent = kevent
 private let sysSendMmsg = CNIOLinux_sendmmsg
 private let sysRecvMmsg = CNIOLinux_recvmmsg
 #elseif os(OpenBSD)
@@ -358,7 +365,7 @@ internal func syscall<T>(
         }
     }
 }
-#elseif os(Linux) || os(Android) || os(OpenBSD)
+#elseif os(Linux) || os(Android) || os(FreeBSD) || os(OpenBSD)
 @inline(__always)
 @inlinable
 @discardableResult
@@ -464,6 +471,15 @@ internal enum Posix: Sendable {
     #elseif os(Linux) || os(FreeBSD) || os(Android) || os(OpenBSD)
     #if canImport(Glibc)
     @usableFromInline
+    #if os(FreeBSD) /* FreeBSD-sys-consts-fix */
+    static let UIO_MAXIOV: Int = 1024
+    @usableFromInline
+    static let SHUT_RD: CInt = 0
+    @usableFromInline
+    static let SHUT_WR: CInt = 1
+    @usableFromInline
+    static let SHUT_RDWR: CInt = 2
+    #else
     static let UIO_MAXIOV: Int = Int(Glibc.UIO_MAXIOV)
     @usableFromInline
     static let SHUT_RD: CInt = CInt(Glibc.SHUT_RD)
@@ -471,6 +487,7 @@ internal enum Posix: Sendable {
     static let SHUT_WR: CInt = CInt(Glibc.SHUT_WR)
     @usableFromInline
     static let SHUT_RDWR: CInt = CInt(Glibc.SHUT_RDWR)
+    #endif
     #elseif canImport(Musl)
     @usableFromInline
     static let UIO_MAXIOV: Int = Int(Musl.UIO_MAXIOV)
@@ -831,7 +848,13 @@ internal enum Posix: Sendable {
                 #elseif os(Linux) || os(FreeBSD) || os(Android)
                 var off: off_t = offset
                 #if canImport(Glibc)
+                #if !os(FreeBSD) /* FreeBSD-sendfile-fix */
                 let result: ssize_t = Glibc.sendfile(descriptor, fd, &off, count)
+                #else
+                var _sbytes: off_t = 0
+                let _r: CInt = Glibc.sendfile(fd, descriptor, offset, count, nil, &_sbytes, 0)
+                let result: ssize_t = _r >= 0 ? ssize_t(_sbytes) : -1
+                #endif
                 #elseif canImport(Musl)
                 let result: ssize_t = Musl.sendfile(descriptor, fd, &off, count)
                 #elseif canImport(Android)
@@ -1092,11 +1115,13 @@ extension Posix {
 }
 #endif
 
-#if canImport(Darwin) || os(OpenBSD)
+#if canImport(Darwin) || os(OpenBSD) || os(FreeBSD)
 #if canImport(Darwin)
 internal typealias kevent_timespec = Darwin.timespec
 #elseif os(OpenBSD)
 internal typealias kevent_timespec = CNIOOpenBSD.timespec
+#elseif os(FreeBSD)
+internal typealias kevent_timespec = Glibc.timespec
 #else
 #error("implementation missing")
 #endif
@@ -1113,6 +1138,8 @@ internal enum KQueue: Sendable {
             Darwin.kqueue()
             #elseif os(OpenBSD)
             CNIOOpenBSD.kqueue()
+            #elseif os(FreeBSD)
+            Glibc.kqueue()
             #else
             #error("implementation missing")
             #endif

@@ -53,7 +53,7 @@ extension ifaddrs {
     fileprivate var dstaddr: UnsafeMutablePointer<sockaddr>? {
         #if os(Linux) || os(Android)
         return self.ifa_ifu.ifu_dstaddr
-        #elseif canImport(Darwin) || os(OpenBSD)
+        #elseif canImport(Darwin) || os(OpenBSD) || os(FreeBSD)
         return self.ifa_dstaddr
         #endif
     }
@@ -61,7 +61,7 @@ extension ifaddrs {
     fileprivate var broadaddr: UnsafeMutablePointer<sockaddr>? {
         #if os(Linux) || os(Android)
         return self.ifa_ifu.ifu_broadaddr
-        #elseif canImport(Darwin) || os(OpenBSD)
+        #elseif canImport(Darwin) || os(OpenBSD) || os(FreeBSD)
         return self.ifa_dstaddr
         #endif
     }

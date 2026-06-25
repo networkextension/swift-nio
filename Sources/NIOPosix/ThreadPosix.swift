@@ -16,7 +16,7 @@
 
 #if os(Linux) || os(Android) || os(FreeBSD) || canImport(Darwin) || os(OpenBSD)
 
-#if os(Linux) || os(Android)
+#if os(Linux) || os(Android) || os(FreeBSD) /* FreeBSD-thread-fix */
 import CNIOLinux
 
 private let sys_pthread_getname_np = CNIOLinux_pthread_getname_np
@@ -26,7 +26,7 @@ private typealias ThreadDestructor = @convention(c) (UnsafeMutableRawPointer) ->
 #else
 private typealias ThreadDestructor = @convention(c) (UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
 #endif
-#elseif os(OpenBSD)
+#elseif os(OpenBSD) || os(FreeBSD)
 import CNIOOpenBSD
 
 private let sys_pthread_getname_np = CNIOOpenBSD_pthread_get_name_np
@@ -57,7 +57,7 @@ private func sysPthread_create(
     let thread = pthread_create(handle, &attr, destructor, args)
     pthread_attr_destroy(&attr)
     return thread
-    #elseif os(OpenBSD)
+    #elseif os(OpenBSD) || os(FreeBSD)
     var attr: pthread_attr_t? = .init(bitPattern: 0)
     pthread_attr_init(&attr)
     let thread = pthread_create(handle, &attr, destructor, args)
@@ -171,7 +171,7 @@ enum ThreadOpsPosix: ThreadOps {
 
                     if let name = name {
                         let maximumThreadNameLength: Int
-                        #if os(Linux) || os(Android)
+                        #if os(Linux) || os(Android) || os(FreeBSD) /* FreeBSD-thread-fix */
                         maximumThreadNameLength = 15
                         #else
                         maximumThreadNameLength = .max

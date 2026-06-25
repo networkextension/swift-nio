@@ -43,7 +43,7 @@ public final class Lock {
     #if os(Windows)
     fileprivate let mutex: UnsafeMutablePointer<SRWLOCK> =
         UnsafeMutablePointer.allocate(capacity: 1)
-    #elseif os(FreeBSD) || os(OpenBSD)
+    #elseif os(FreeBSD) || os(OpenBSD) || os(FreeBSD)
     fileprivate let mutex: UnsafeMutablePointer<pthread_mutex_t?> =
         UnsafeMutablePointer.allocate(capacity: 1)
     #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
@@ -56,15 +56,15 @@ public final class Lock {
         #if os(Windows)
         InitializeSRWLock(self.mutex)
         #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
-        #if os(FreeBSD) || os(OpenBSD)
+        #if os(FreeBSD) || os(OpenBSD) || os(FreeBSD)
         var attr = pthread_mutexattr_t(bitPattern: 0)
         #else
-        var attr = pthread_mutexattr_t()
+        var attr: pthread_mutexattr_t? = pthread_mutexattr_t(bitPattern: 0)
         #endif
         var err = pthread_mutexattr_init(&attr)
         precondition(err == 0, "\(#function) failed in pthread_mutexattr_init with error \(err)")
         debugOnly {
-            #if os(FreeBSD) || os(OpenBSD)
+            #if os(FreeBSD) || os(OpenBSD) || os(FreeBSD)
             pthread_mutexattr_settype(&attr, .init(PTHREAD_MUTEX_ERRORCHECK.rawValue))
             #else
             pthread_mutexattr_settype(&attr, .init(PTHREAD_MUTEX_ERRORCHECK))
@@ -152,7 +152,7 @@ public final class ConditionLock<T: Equatable> {
     #if os(Windows)
     private let cond: UnsafeMutablePointer<CONDITION_VARIABLE> =
         UnsafeMutablePointer.allocate(capacity: 1)
-    #elseif os(FreeBSD) || os(OpenBSD)
+    #elseif os(FreeBSD) || os(OpenBSD) || os(FreeBSD)
     private let cond: UnsafeMutablePointer<pthread_cond_t?> =
         UnsafeMutablePointer.allocate(capacity: 1)
     #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
