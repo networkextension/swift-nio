@@ -313,7 +313,7 @@ extension FileDescriptor {
     }
 }
 
-#if canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+#if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Bionic)
 extension FileDescriptor.OpenOptions {
     static var temporaryFile: Self {
         Self(rawValue: CNIOLinux_O_TMPFILE)
