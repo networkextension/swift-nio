@@ -468,8 +468,8 @@ internal enum Posix: Sendable {
     static let SHUT_RDWR: CInt = CInt(Darwin.SHUT_RDWR)
     #elseif os(Linux) || os(FreeBSD) || os(Android) || os(OpenBSD)
     #if canImport(Glibc)
-    @usableFromInline
     #if os(FreeBSD) /* FreeBSD-sys-consts-fix */
+    @usableFromInline
     static let UIO_MAXIOV: Int = 1024
     @usableFromInline
     static let SHUT_RD: CInt = 0
@@ -478,6 +478,7 @@ internal enum Posix: Sendable {
     @usableFromInline
     static let SHUT_RDWR: CInt = 2
     #else
+    @usableFromInline
     static let UIO_MAXIOV: Int = Int(Glibc.UIO_MAXIOV)
     @usableFromInline
     static let SHUT_RD: CInt = CInt(Glibc.SHUT_RD)
