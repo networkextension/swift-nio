@@ -15,7 +15,7 @@
 import NIOConcurrencyHelpers
 import NIOCore
 
-#if canImport(Darwin) || os(OpenBSD)
+#if canImport(Darwin) || os(OpenBSD) || os(FreeBSD)
 
 /// Represents the `kqueue` filters we might use:
 ///
@@ -83,7 +83,7 @@ extension KQueueEventFilterSet {
         }
 
         for (event, filter) in [
-            (KQueueEventFilterSet.read, EVFILT_READ), (.write, EVFILT_WRITE), (.except, EVFILT_EXCEPT),
+            (KQueueEventFilterSet.read, EVFILT_READ), (.write, EVFILT_WRITE),
         ] {
             if let flags = calculateKQueueChange(event: event) {
                 kevents.appendEvent(
@@ -94,6 +94,18 @@ extension KQueueEventFilterSet {
                 )
             }
         }
+        #if !os(FreeBSD) /* FreeBSD-evfilt-fix */
+        for (event, filter) in [(KQueueEventFilterSet.except, EVFILT_EXCEPT)] {
+            if let flags = calculateKQueueChange(event: event) {
+                kevents.appendEvent(
+                    fileDescriptor: fileDescriptor,
+                    filter: filter,
+                    flags: flags,
+                    registrationID: registrationID
+                )
+            }
+        }
+        #endif
 
         try kevents.withUnsafeBufferPointer(body)
     }
@@ -305,12 +317,20 @@ extension Selector: _SelectorBackendProtocol {
             switch filter {
             case EVFILT_READ:
                 selectorEvent.formUnion(.read)
+            #if !os(FreeBSD)
                 fallthrough  // falling through here as `EVFILT_READ` also delivers `EV_EOF` (meaning `.readEOF`)
+            #else
+                if Int32(ev.flags) & EV_EOF != 0 && registration.interested.contains(.readEOF) {
+                    selectorEvent.formUnion(.readEOF)
+                }
+            #endif
+            #if !os(FreeBSD)
             case EVFILT_EXCEPT:
                 if Int32(ev.flags) & EV_EOF != 0 && registration.interested.contains(.readEOF) {
                     // we only add `.readEOF` if it happened and the user asked for it
                     selectorEvent.formUnion(.readEOF)
                 }
+            #endif
             case EVFILT_WRITE:
                 selectorEvent.formUnion(.write)
             default:

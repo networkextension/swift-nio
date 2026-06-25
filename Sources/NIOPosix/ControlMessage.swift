@@ -240,7 +240,7 @@ struct ControlMessageParser {
                 self.ecnValue = .init(receivedValue: readValue)
             }
         } else if controlMessage.type == Posix.IP_PKTINFO {
-            #if !os(OpenBSD)
+            #if !os(OpenBSD) && !os(FreeBSD) /* FreeBSD-inpktinfo-fix */
             if let data = controlMessage.data {
                 let info = data.load(as: in_pktinfo.self)
                 var addr = sockaddr_in()

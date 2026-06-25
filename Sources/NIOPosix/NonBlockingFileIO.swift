@@ -830,7 +830,7 @@ public struct NonBlockingFileIO: Sendable {
                         let ptr = pointer.baseAddress!.assumingMemoryBound(to: CChar.self)
                         return String(cString: ptr)
                     }
-                    #if os(OpenBSD)
+                    #if os(OpenBSD) || os(FreeBSD) /* FreeBSD-dfileno-fix */
                     let ino = entry.pointee.d_fileno
                     #else
                     let ino = entry.pointee.d_ino
@@ -1284,7 +1284,7 @@ extension NonBlockingFileIO {
                         let ptr = pointer.baseAddress!.assumingMemoryBound(to: CChar.self)
                         return String(cString: ptr)
                     }
-                    #if os(OpenBSD)
+                    #if os(OpenBSD) || os(FreeBSD) /* FreeBSD-dfileno-fix */
                     let ino = entry.pointee.d_fileno
                     #else
                     let ino = entry.pointee.d_ino
