@@ -23,7 +23,7 @@ import CNIODarwin
 internal typealias MMsgHdr = CNIODarwin_mmsghdr
 #elseif os(FreeBSD)
 @_exported @preconcurrency import Glibc
-import CNIOFreeBSD
+@_exported import CNIOFreeBSD
 internal typealias MMsgHdr = CNIOFreeBSD_mmsghdr
 // in6_pktinfo is already defined in FreeBSD system headers
 #elseif os(Linux) || os(Android)
