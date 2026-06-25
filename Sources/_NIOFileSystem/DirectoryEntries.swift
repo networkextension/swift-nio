@@ -382,6 +382,10 @@ private struct DirectoryEnumerator: Sendable {
         case symbolicLink
         case symbolicLinkToNonExistentTarget
 
+        #if os(FreeBSD)
+        init?(rawValue: Int32) { self.init(rawValue: UInt16(truncatingIfNeeded: rawValue)) }
+        #endif
+
         // Compatibility function.
         @_disfavoredOverload
         init?(rawValue: UInt16) {

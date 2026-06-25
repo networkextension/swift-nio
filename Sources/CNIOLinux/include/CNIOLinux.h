@@ -25,6 +25,7 @@
 #include <sys/xattr.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fts.h>
 #include <sys/vfs.h>
 #include <sched.h>
 #include <stdbool.h>
@@ -50,6 +51,47 @@
 // but we also need to make sure the system includes come before it on Linux, so we put it down here
 // between an `#endif/#ifdef` pair rather than at the top.
 #include "liburing_nio.h"
+#if defined(__FreeBSD__) /* FreeBSD-cniolinux-fix */
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <pthread_np.h>
+typedef struct { struct msghdr msg_hdr; unsigned int msg_len; } CNIOLinux_mmsghdr;
+typedef struct { struct in6_addr ipi6_addr; unsigned int ipi6_ifindex; } CNIOLinux_in6_pktinfo;
+static inline int CNIOLinux_sendmmsg(int s,CNIOLinux_mmsghdr *v,unsigned int n,int f){return sendmmsg(s,(struct mmsghdr*)v,n,f);}
+static inline int CNIOLinux_recvmmsg(int s,CNIOLinux_mmsghdr *v,unsigned int n,int f,struct timespec *t){return recvmmsg(s,(struct mmsghdr*)v,n,f,t);}
+static inline struct cmsghdr *CNIOLinux_CMSG_FIRSTHDR(const struct msghdr *m){return CMSG_FIRSTHDR(m);}
+static inline struct cmsghdr *CNIOLinux_CMSG_NXTHDR(struct msghdr *m,struct cmsghdr *c){return CMSG_NXTHDR(m,c);}
+static inline const void *CNIOLinux_CMSG_DATA(const struct cmsghdr *c){return CMSG_DATA(c);}
+static inline void *CNIOLinux_CMSG_DATA_MUTABLE(struct cmsghdr *c){return CMSG_DATA(c);}
+static inline size_t CNIOLinux_CMSG_LEN(size_t n){return CMSG_LEN(n);}
+static inline size_t CNIOLinux_CMSG_SPACE(size_t n){return CMSG_SPACE(n);}
+static inline int CNIOLinux_pthread_setname_np(pthread_t t,const char *n){pthread_set_name_np(t,n);return 0;}
+static inline int CNIOLinux_pthread_getname_np(pthread_t t,char *n,size_t l){pthread_get_name_np(t,n,l);return 0;}
+static inline int CNIOLinux_accept4(int s,struct sockaddr *a,socklen_t *l,int f){return accept4(s,a,l,f);}
+#ifndef IPTOS_ECN_NOT_ECT
+#define IPTOS_ECN_NOT_ECT 0x00
+#define IPTOS_ECN_MASK    0x03
+#define IPTOS_ECN_ECT0    0x02
+#define IPTOS_ECN_ECT1    0x01
+#define IPTOS_ECN_CE      0x03
+#endif
+#ifndef IP_PKTINFO
+#define IP_PKTINFO (-1)
+#endif
+#ifndef IPV6_RECVPKTINFO
+#define IPV6_RECVPKTINFO 36
+#endif
+#ifndef IPV6_PKTINFO
+#define IPV6_PKTINFO 46
+#endif
+#include <sys/stat.h>
+#include <fts.h>
+#define CNIOLinux_UTIME_OMIT UTIME_OMIT
+#define CNIOLinux_UTIME_NOW  UTIME_NOW
+#include <dirent.h>
+static inline const char *CNIOLinux_dirent_dname(struct dirent *ent) { return ent->d_name; }
+#endif /* __FreeBSD__ */
 
 #ifdef __linux__
 
@@ -150,6 +192,8 @@ extern const unsigned int CNIOLinux_RENAME_EXCHANGE;
 
 extern const unsigned long CNIOLinux_UTIME_OMIT;
 extern const unsigned long CNIOLinux_UTIME_NOW;
+
+extern const long CNIOLinux_UDP_MAX_SEGMENTS;
 
 // Filesystem magic constants for cgroup detection
 #ifdef __ANDROID__
