@@ -49,7 +49,9 @@ jobs:
           pkill -u swift -f "swift-package resolve" 2>/dev/null || true
           . "$HOME/swift64-env.sh"
           cd "$HOME/ci/swift-nio"
-          swift build --build-system native 2>&1
+          ln -sf "$SWIFT64/bin/swiftc" swiftc
+          "$SWIFT64/bin/swift-build" --build-system native 2>&1
+          rm -f swiftc
           ENDSSH
 
   freebsd-144-aarch64:
@@ -95,5 +97,8 @@ jobs:
           pkill -u swift -f "swift-package resolve" 2>/dev/null || true
           . "$HOME/swift632-env.sh"
           cd "$HOME/ci/swift-nio"
-          swift build --build-system native 2>&1
+          TC="$HOME/s632-clean-install/usr/local/swift"
+          ln -sf "$TC/bin/swiftc" swiftc
+          "$TC/bin/swift-build" --build-system native 2>&1
+          rm -f swiftc
           ENDSSH
