@@ -1,0 +1,99 @@
+name: FreeBSD aarch64
+
+on:
+  push:
+    branches: ['freebsd-community-integration', 'freebsd-compat', 'freebsd-compat-*']
+  workflow_dispatch:
+
+jobs:
+  freebsd-151-aarch64:
+    name: Build / FreeBSD 15.1 aarch64 (Swift 6.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: ${{ github.repository == 'networkextension/swift-nio' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+          echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+          sudo apt-get update && sudo apt-get install -y cloudflared
+      - name: Set up SSH key and known hosts
+        env:
+          FREEBSD_SSH_KEY: ${{ secrets.FREEBSD_SSH_KEY }}
+          FREEBSD_CF_HOSTNAME: ${{ secrets.FREEBSD_CF_HOSTNAME }}
+        run: |
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$FREEBSD_SSH_KEY" > "$HOME/.ssh/freebsd_ci_key"
+          chmod 600 "$HOME/.ssh/freebsd_ci_key"
+          printf '%s ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFqpy2Vs6oX1K5khxWW7INHC8a6meSaSvNDVXpCSv1Gj\n' \
+            "$FREEBSD_CF_HOSTNAME" >> "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          printf 'Host freebsd-ci\n  HostName %s\n  User swift\n  IdentityFile %s/.ssh/freebsd_ci_key\n  ProxyCommand cloudflared access tcp --hostname %%h\n  ServerAliveInterval 60\n  ServerAliveCountMax 30\n' \
+            "$FREEBSD_CF_HOSTNAME" "$HOME" > "$HOME/.ssh/config"
+          chmod 600 "$HOME/.ssh/config"
+      - name: Sync source to board
+        run: |
+          ssh -F "$HOME/.ssh/config" freebsd-ci 'mkdir -p /home/swift/ci/swift-nio'
+          rsync -avz --delete \
+            --exclude='.build' --exclude='.git' \
+            -e "ssh -F $HOME/.ssh/config" \
+            . freebsd-ci:/home/swift/ci/swift-nio/
+      - name: Build on FreeBSD 15.1 aarch64
+        run: |
+          ssh -F "$HOME/.ssh/config" freebsd-ci /bin/sh << 'ENDSSH'
+          set -e
+          # Stop any swift processes left over from a previous cancelled/timed-out run.
+          pkill -u swift -x swift-build 2>/dev/null || true
+          pkill -u swift -f "swift-package resolve" 2>/dev/null || true
+          . "$HOME/swift64-env.sh"
+          cd "$HOME/ci/swift-nio"
+          swift build 2>&1
+          ENDSSH
+
+  freebsd-144-aarch64:
+    name: Build / FreeBSD 14.4 aarch64 (Swift 6.3.2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: ${{ github.repository == 'networkextension/swift-nio' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+          echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+          sudo apt-get update && sudo apt-get install -y cloudflared
+      - name: Set up SSH key and known hosts
+        env:
+          FREEBSD_SSH_KEY: ${{ secrets.FREEBSD_SSH_KEY }}
+          FREEBSD_CF_HOSTNAME_144: ${{ secrets.FREEBSD_CF_HOSTNAME_144 }}
+        run: |
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$FREEBSD_SSH_KEY" > "$HOME/.ssh/freebsd_ci_key_144"
+          chmod 600 "$HOME/.ssh/freebsd_ci_key_144"
+          printf '%s ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIQes9chPEJ0dX9K07yo8gtd8JzNw9mrPn7KwKC46Jje\n' \
+            "$FREEBSD_CF_HOSTNAME_144" >> "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          printf 'Host freebsd-ci-2\n  HostName %s\n  User swift\n  IdentityFile %s/.ssh/freebsd_ci_key_144\n  ProxyCommand cloudflared access tcp --hostname %%h\n  ServerAliveInterval 60\n  ServerAliveCountMax 30\n' \
+            "$FREEBSD_CF_HOSTNAME_144" "$HOME" > "$HOME/.ssh/config"
+          chmod 600 "$HOME/.ssh/config"
+      - name: Sync source to board
+        run: |
+          ssh -F "$HOME/.ssh/config" freebsd-ci-2 'mkdir -p /home/swift/ci/swift-nio'
+          rsync -avz --delete \
+            --exclude='.build' --exclude='.git' \
+            -e "ssh -F $HOME/.ssh/config" \
+            . freebsd-ci-2:/home/swift/ci/swift-nio/
+      - name: Build on FreeBSD 14.4 aarch64
+        run: |
+          ssh -F "$HOME/.ssh/config" freebsd-ci-2 /bin/sh << 'ENDSSH'
+          set -e
+          # Stop any swift processes left over from a previous cancelled/timed-out run.
+          pkill -u swift -x swift-build 2>/dev/null || true
+          pkill -u swift -f "swift-package resolve" 2>/dev/null || true
+          . "$HOME/swift632-env.sh"
+          cd "$HOME/ci/swift-nio"
+          swift build 2>&1
+          ENDSSH
