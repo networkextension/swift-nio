@@ -533,7 +533,13 @@ internal enum Posix: Sendable {
     static let IPTOS_ECN_ECT0: CInt = CNIODarwin_IPTOS_ECN_ECT0
     static let IPTOS_ECN_ECT1: CInt = CNIODarwin_IPTOS_ECN_ECT1
     static let IPTOS_ECN_CE: CInt = CNIODarwin_IPTOS_ECN_CE
-    #elseif os(Linux) || os(FreeBSD) || os(Android)
+    #elseif os(FreeBSD)
+    static let IPTOS_ECN_NOTECT: CInt = CInt(CNIOFreeBSD.IPTOS_ECN_NOT_ECT)
+    static let IPTOS_ECN_MASK: CInt = CInt(CNIOFreeBSD.IPTOS_ECN_MASK)
+    static let IPTOS_ECN_ECT0: CInt = CInt(CNIOFreeBSD.IPTOS_ECN_ECT0)
+    static let IPTOS_ECN_ECT1: CInt = CInt(CNIOFreeBSD.IPTOS_ECN_ECT1)
+    static let IPTOS_ECN_CE: CInt = CInt(CNIOFreeBSD.IPTOS_ECN_CE)
+    #elseif os(Linux) || os(Android)
     #if os(Android)
     static let IPTOS_ECN_NOTECT: CInt = CInt(CNIOLinux.IPTOS_ECN_NOTECT)
     #else
@@ -563,7 +569,13 @@ internal enum Posix: Sendable {
 
     static let IPV6_RECVPKTINFO: CInt = CNIODarwin_IPV6_RECVPKTINFO
     static let IPV6_PKTINFO: CInt = CNIODarwin_IPV6_PKTINFO
-    #elseif os(Linux) || os(FreeBSD) || os(Android)
+    #elseif os(FreeBSD)
+    static let IP_RECVPKTINFO: CInt = CInt(CNIOFreeBSD.IP_PKTINFO)  // -1, not supported on FreeBSD
+    static let IP_PKTINFO: CInt = CInt(CNIOFreeBSD.IP_PKTINFO)
+
+    static let IPV6_RECVPKTINFO: CInt = CInt(CNIOFreeBSD.IPV6_RECVPKTINFO)
+    static let IPV6_PKTINFO: CInt = CInt(CNIOFreeBSD.IPV6_PKTINFO)
+    #elseif os(Linux) || os(Android)
     static let IP_RECVPKTINFO: CInt = CInt(CNIOLinux.IP_PKTINFO)
     static let IP_PKTINFO: CInt = CInt(CNIOLinux.IP_PKTINFO)
 
