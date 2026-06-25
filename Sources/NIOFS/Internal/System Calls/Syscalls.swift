@@ -357,6 +357,23 @@ internal func system_sendfile(
     var offset = offset
     return sendfile(outFD, inFD, &offset, count)
 }
+#elseif os(FreeBSD)
+/// sendfile(2): FreeBSD 7-arg form: sendfile(fd, s, offset, nbytes, hdtr, sbytes, flags)
+internal func system_sendfile(
+    _ outFD: CInt,
+    _ inFD: CInt,
+    _ offset: off_t,
+    _ count: Int
+) -> Int {
+    #if ENABLE_MOCKING
+    if mockingEnabled {
+        return mockInt(outFD, inFD, offset, count)
+    }
+    #endif
+    var sbytes: off_t = 0
+    let r = sendfile(inFD, outFD, offset, count, nil, &sbytes, 0)
+    return r >= 0 ? Int(sbytes) : -1
+}
 #endif
 
 internal func system_futimens(

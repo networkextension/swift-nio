@@ -255,7 +255,7 @@ public enum Syscall: Sendable {
         }
     }
 
-    #if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Bionic)
+    #if canImport(Glibc) || canImport(Musl) || canImport(Bionic)
     @_spi(Testing)
     public static func sendfile(
         to output: FileDescriptor,
