@@ -73,7 +73,7 @@ extern const unsigned long CNIOFreeBSD_UTIME_NOW;
 
 extern const long CNIOFreeBSD_UDP_MAX_SEGMENTS;
 
-FTS *CNIOFreeBSD_fts_open(char * const *path_argv, int options, int (*compar)(const FTSENT **, const FTSENT **));
+FTS *CNIOFreeBSD_fts_open(char * const *path_argv, int options, int (*compar)(const FTSENT *const *, const FTSENT *const *));
 
 // ECN / IP_PKTINFO constants not in standard FreeBSD headers at the same names
 #define IPTOS_ECN_NOT_ECT 0x00

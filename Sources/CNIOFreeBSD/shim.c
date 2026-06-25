@@ -91,7 +91,7 @@ const unsigned long CNIOFreeBSD_UTIME_NOW = UTIME_NOW;
 
 const long CNIOFreeBSD_UDP_MAX_SEGMENTS = -1;
 
-FTS *CNIOFreeBSD_fts_open(char * const *path_argv, int options, int (*compar)(const FTSENT **, const FTSENT **)) {
+FTS *CNIOFreeBSD_fts_open(char * const *path_argv, int options, int (*compar)(const FTSENT *const *, const FTSENT *const *)) {
     return fts_open(path_argv, options, compar);
 }
 
