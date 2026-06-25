@@ -382,6 +382,9 @@ private struct DirectoryEnumerator: Sendable {
         case symbolicLink
         case symbolicLinkToNonExistentTarget
 
+        #if os(FreeBSD)
+        init?(rawValue: Int32) { self.init(rawValue: UInt16(truncatingIfNeeded: rawValue)) }
+        #endif
         init?(rawValue: UInt16) {
             switch Int32(rawValue) {
             case FTS_D:

@@ -89,6 +89,8 @@ static inline int CNIOLinux_accept4(int s,struct sockaddr *a,socklen_t *l,int f)
 #include <fts.h>
 #define CNIOLinux_UTIME_OMIT UTIME_OMIT
 #define CNIOLinux_UTIME_NOW  UTIME_NOW
+#include <dirent.h>
+static inline const char *CNIOLinux_dirent_dname(struct dirent *ent) { return ent->d_name; }
 #endif /* __FreeBSD__ */
 
 #ifdef __linux__
