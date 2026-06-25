@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, 'freebsd-compat']
   push:
-    branches: ['freebsd-compat']
+    branches: ['freebsd-compat', 'freebsd-compat-*']
   workflow_dispatch:
 
 jobs:
