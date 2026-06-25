@@ -82,6 +82,10 @@ const int CNIOFreeBSD_IPV6_PKTINFO = IPV6_PKTINFO;
 const int CNIOFreeBSD_IPV6_PKTINFO = -1;
 #endif
 
+const int CNIOFreeBSD_SHUT_RD = SHUT_RD;
+const int CNIOFreeBSD_SHUT_WR = SHUT_WR;
+const int CNIOFreeBSD_SHUT_RDWR = SHUT_RDWR;
+
 const char *CNIOFreeBSD_inet_ntop(int af, const void *src, char *dst, socklen_t size) {
     return inet_ntop(af, src, dst, size);
 }

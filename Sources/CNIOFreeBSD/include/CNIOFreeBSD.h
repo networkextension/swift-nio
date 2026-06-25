@@ -50,6 +50,12 @@ extern const int CNIOFreeBSD_IP_PKTINFO;
 extern const int CNIOFreeBSD_IPV6_RECVPKTINFO;
 extern const int CNIOFreeBSD_IPV6_PKTINFO;
 
+// SHUT_RD/WR/RDWR are a C enum (shutdown_how) in FreeBSD; expose as plain int so
+// Swift can use them without rawValue gymnastics across compiler versions.
+extern const int CNIOFreeBSD_SHUT_RD;
+extern const int CNIOFreeBSD_SHUT_WR;
+extern const int CNIOFreeBSD_SHUT_RDWR;
+
 const char *CNIOFreeBSD_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 int CNIOFreeBSD_inet_pton(int af, const char *src, void *dst);
 
