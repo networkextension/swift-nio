@@ -46,6 +46,6 @@ jobs:
           set -e
           . "$HOME/swift632-env.sh"
           cd "$HOME/ci/swift-nio"
-          swift build -j$(sysctl -n hw.ncpu) 2>&1
+          swift build 2>&1
           ENDSSH
         timeout-minutes: 30
