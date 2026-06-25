@@ -54,7 +54,7 @@
 #endif
 #ifdef __ANDROID__
 #include <sys/endian.h>
-#elif defined(__linux__) || defined(__APPLE__) || defined(__wasm32__) || defined(__OpenBSD__)
+#elif defined(__linux__) || defined(__APPLE__) || defined(__wasm32__) || defined(__OpenBSD__) || defined(__FreeBSD__)
 #include <sys/types.h>
 #elif defined(_WIN32) || defined(_WIN64)
 	#ifndef LITTLE_ENDIAN
