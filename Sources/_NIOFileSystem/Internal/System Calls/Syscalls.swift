@@ -191,7 +191,7 @@ internal func system_flistxattr(
     #if canImport(Darwin)
     // The final parameter is 'options'; there is no equivalent on Linux.
     return flistxattr(fd, namebuf, size, 0)
-    #elseif canImport(Glibc) || canImport(Musl) || canImport(Android)
+    #elseif (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Android)
     return flistxattr(fd, namebuf, size)
     #endif
 }
@@ -213,7 +213,7 @@ internal func system_fgetxattr(
     // Penultimate parameter is position which is reserved and should be zero.
     // The final parameter is 'options'; there is no equivalent on Linux.
     return fgetxattr(fd, name, value, size, 0, 0)
-    #elseif canImport(Glibc) || canImport(Musl) || canImport(Android)
+    #elseif (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Android)
     return fgetxattr(fd, name, value, size)
     #endif
 }
@@ -235,7 +235,7 @@ internal func system_fsetxattr(
     #if canImport(Darwin)
     // Penultimate parameter is position which is reserved and should be zero.
     return fsetxattr(fd, name, value, size, 0, 0)
-    #elseif canImport(Glibc) || canImport(Musl) || canImport(Android)
+    #elseif (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Android)
     return fsetxattr(fd, name, value, size, 0)
     #endif
 }
@@ -254,7 +254,7 @@ internal func system_fremovexattr(
     #if canImport(Darwin)
     // The final parameter is 'options'; there is no equivalent on Linux.
     return fremovexattr(fd, name, 0)
-    #elseif canImport(Glibc) || canImport(Musl) || canImport(Android)
+    #elseif (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Android)
     return fremovexattr(fd, name)
     #endif
 }
@@ -303,7 +303,7 @@ internal func system_renameatx_np(
 }
 #endif
 
-#if canImport(Glibc) || canImport(Musl) || canImport(Android)
+#if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Android)
 internal func system_renameat2(
     _ oldFD: FileDescriptor.RawValue,
     _ old: UnsafePointer<CInterop.PlatformChar>,
@@ -321,7 +321,7 @@ internal func system_renameat2(
 #endif
 
 /// link(2): Creates a new link for a file.
-#if canImport(Glibc) || canImport(Musl) || canImport(Android)
+#if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Android)
 internal func system_linkat(
     _ oldFD: FileDescriptor.RawValue,
     _ old: UnsafePointer<CInterop.PlatformChar>,
@@ -377,7 +377,7 @@ internal func system_unlinkat(
     return unlinkat(fd, path, flags)
 }
 
-#if canImport(Glibc) || canImport(Musl) || canImport(Android)
+#if (canImport(Glibc) && !os(FreeBSD)) || canImport(Musl) || canImport(Android)
 /// sendfile(2): Transfer data between descriptors
 internal func system_sendfile(
     _ outFD: CInt,
