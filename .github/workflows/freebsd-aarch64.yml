@@ -48,4 +48,4 @@ jobs:
           cd "$HOME/ci/swift-nio"
           swift build 2>&1
           ENDSSH
-        timeout-minutes: 30
+        timeout-minutes: 90
