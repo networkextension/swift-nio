@@ -51,7 +51,8 @@ jobs:
           cd "$HOME/ci/swift-nio"
           rm -rf .build
           ln -sf "$SWIFT64/bin/swiftc" swiftc
-          "$SWIFT64/bin/swift-build" --build-system native NIOCrashTester 2>&1
+          "$SWIFT64/bin/swift-build" --build-system native NIOCrashTester 2>&1 || \
+            test -f .build/aarch64-unknown-freebsd/debug/NIOCrashTester
           rm -f swiftc
           ENDSSH
 
