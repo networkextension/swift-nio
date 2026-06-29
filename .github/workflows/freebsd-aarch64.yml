@@ -151,7 +151,6 @@ jobs:
           cd "$HOME/ci/swift-nio"
           rm -rf .build
           ln -sf "$SWIFT632/bin/swiftc" swiftc
-          "$SWIFT632/bin/swift-build" --build-system native NIOCrashTester 2>&1 || \
-            find .build -name NIOCrashTester -type f | grep -q .
+          "$SWIFT632/bin/swift-build" --build-system native --target NIOCrashTester 2>&1
           rm -f swiftc
           ENDSSH
