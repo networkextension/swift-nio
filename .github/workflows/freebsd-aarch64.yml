@@ -1,4 +1,4 @@
-name: FreeBSD aarch64
+name: FreeBSD CI
 
 on:
   push:
@@ -104,5 +104,54 @@ jobs:
           rm -rf .build
           ln -sf "$TC/bin/swiftc" swiftc
           "$TC/bin/swift" build --target NIOTests 2>&1
+          rm -f swiftc
+          ENDSSH
+
+  freebsd-151-amd64:
+    name: Build / FreeBSD 15.1 amd64 (Swift 6.3-dev)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: ${{ github.repository == 'networkextension/swift-nio' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+          echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+          sudo apt-get update && sudo apt-get install -y cloudflared
+      - name: Set up SSH key and known hosts
+        env:
+          FREEBSD_SSH_KEY_83: ${{ secrets.FREEBSD_SSH_KEY_83 }}
+          FREEBSD_CF_HOSTNAME_83: ${{ secrets.FREEBSD_CF_HOSTNAME_83 }}
+        run: |
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$FREEBSD_SSH_KEY_83" > "$HOME/.ssh/freebsd_ci_key_83"
+          chmod 600 "$HOME/.ssh/freebsd_ci_key_83"
+          printf '%s ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINZfBMe+Qy6tDGTD/sBO5axhRXqEY5cbvuzL8o5owkBO\n' \
+            "$FREEBSD_CF_HOSTNAME_83" >> "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          printf 'Host freebsd-ci-3\n  HostName %s\n  User swift\n  IdentityFile %s/.ssh/freebsd_ci_key_83\n  ProxyCommand cloudflared access tcp --hostname %%h\n  ServerAliveInterval 60\n  ServerAliveCountMax 30\n' \
+            "$FREEBSD_CF_HOSTNAME_83" "$HOME" > "$HOME/.ssh/config"
+          chmod 600 "$HOME/.ssh/config"
+      - name: Sync source to board
+        run: |
+          ssh -F "$HOME/.ssh/config" freebsd-ci-3 'mkdir -p /home/swift/ci/swift-nio'
+          rsync -avz --delete \
+            --exclude='.build' --exclude='.git' \
+            -e "ssh -F $HOME/.ssh/config" \
+            . freebsd-ci-3:/home/swift/ci/swift-nio/
+      - name: Build on FreeBSD 15.1 amd64
+        run: |
+          ssh -F "$HOME/.ssh/config" freebsd-ci-3 /bin/sh << 'ENDSSH'
+          set -e
+          pkill -u swift -f "swift-package" 2>/dev/null || true
+          pkill -u swift -f "swift-frontend" 2>/dev/null || true
+          . "$HOME/swift632-env.sh"
+          cd "$HOME/ci/swift-nio"
+          rm -rf .build
+          ln -sf "$SWIFT632/bin/swiftc" swiftc
+          "$SWIFT632/bin/swift-build" --build-system native NIOCrashTester 2>&1 || \
+            find .build -name NIOCrashTester -type f | grep -q .
           rm -f swiftc
           ENDSSH
